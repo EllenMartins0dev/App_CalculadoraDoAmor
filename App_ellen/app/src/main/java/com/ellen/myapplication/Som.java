@@ -5,11 +5,22 @@ import android.media.MediaPlayer;
 
 public class Som {
     private static MediaPlayer player;
+    private static MediaPlayer trilhaPlayer;
 
     public static void executar(Context context, int somId) {
+        if (player != null) {
+            player.release();
+            player = null;
+        }
         player = MediaPlayer.create(context, somId);
         player.start();
-        player.setLooping(true);
+        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                // Reinicia a trilha de áudio após a conclusão da reprodução do som
+                tocarTrilha(context, R.raw.trilha);
+            }
+        });
     }
 
     public static void parar() {
@@ -17,6 +28,11 @@ public class Som {
             player.stop();
             player.release();
             player = null;
+        }
+        if (trilhaPlayer != null) {
+            trilhaPlayer.stop();
+            trilhaPlayer.release();
+            trilhaPlayer = null;
         }
     }
 
@@ -29,12 +45,22 @@ public class Som {
             // Toca música para um amor possível
             somId = R.raw.depression;
         } else if (porcentagem >= 50 && porcentagem < 80) {
-            // Toca música fpara um amor provavel
+            // Toca música para um amor provavel
             somId = R.raw.oq_e_amor;
         } else {
             // Toca música para um amor real
             somId = R.raw.amor_verdadeiro;
         }
         executar(context, somId);
+    }
+
+    public static void tocarTrilha(Context context, int trilhaId) {
+        if (trilhaPlayer != null) {
+            trilhaPlayer.release();
+            trilhaPlayer = null;
+        }
+        trilhaPlayer = MediaPlayer.create(context, trilhaId);
+        trilhaPlayer.setLooping(true);
+        trilhaPlayer.start();
     }
 }
